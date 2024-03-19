@@ -1,11 +1,11 @@
 # local imports
-from get_data import *
-import backtest
-import evaluate_model
-import process_data
-import train_model
-import config
-import utils
+from src.get_data import *
+import src.backtest as backtest
+import src.evaluate_model as evaluate_model
+import src.process_data as process_data
+import src.train_model as train_model
+import src.config as config
+import src.utils as utils
 
 # import trade
 

@@ -13,7 +13,7 @@ from telegram.ext import (
 )
 
 if __name__ == "__main__":
-    import config
+    import src.config as config
 
 
 class TelegramDatastore:

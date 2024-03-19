@@ -2,19 +2,23 @@ import tensorflow as tf
 import shutil
 from tensorflow.keras.models import load_model
 import shutil
-import utils
+import src.utils as utils
 
 export_model = True
+
 
 def export_model(model, ticker):
     utils.cleanup_zip()
     if export_model:
-        filename = f'trained_{ticker}'
+        filename = f"trained_{ticker}"
     model.save(filename)
-    shutil.make_archive(filename, 'zip', filename)
-    print(f'Saved the trained {ticker} weights')
+    shutil.make_archive(filename, "zip", filename)
+    print(f"Saved the trained {ticker} weights")
 
-def train_model(X_train, X_test, y_train, y_test, ticker, modelzipfile, train_model=True):
+
+def train_model(
+    X_train, X_test, y_train, y_test, ticker, modelzipfile, train_model=True
+):
     if train_model:
         # LSTM Model with Optimizations
         model = tf.keras.models.Sequential(
@@ -60,7 +64,7 @@ def train_model(X_train, X_test, y_train, y_test, ticker, modelzipfile, train_mo
             validation_data=(X_test, y_test),
             callbacks=[early_stopping],
         )
-        
+
         # save model
         export_model(model, ticker)
 

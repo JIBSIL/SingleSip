@@ -5,14 +5,14 @@ import datetime as dt
 import time
 import os
 
-from get_data import *
-import prediction
-import evaluate_model
-import process_data
-import train_model
-import trade
-import config
-import utils
+from src.get_data import *
+import src.prediction as prediction
+import src.evaluate_model as evaluate_model
+import src.process_data as process_data
+import src.train_model as train_model
+import src.trade as trade
+import src.config as config
+import src.utils as utils
 
 (
     ticker,
