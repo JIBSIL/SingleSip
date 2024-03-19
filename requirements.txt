@@ -1,0 +1,10 @@
+iso8601
+scheduler
+numpy
+pyyaml
+tensorflow
+python-telegram-bot
+pandas
+scikit-learn
+requests
+matplotlib
