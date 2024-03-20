@@ -293,3 +293,10 @@ def backtest(
     print(
         f"The model was right {model_right_amount} times and wrong {model_wrong_amount} times ({round((model_right_amount / (model_right_amount + model_wrong_amount)) * 100, 2)}%)"
     )
+
+    return (
+        change_percent,
+        stoploss_activated,
+        friendly_gainloss_percentage,
+        round(outperform_val, 2),
+    )

@@ -1,8 +1,8 @@
 # pip install python-telegram-bot
 
-import asyncio
 import time
 import os
+import threading
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -115,9 +115,10 @@ class TelegramBot:
         self.bot.add_handler(start_handler)
         self.bot.add_handler(authentication_handler)
         self.bot.add_handler(message_handler)
-        asyncio.create_task(self.run())
-    
-    async def run(self):
+        thread = threading.Thread(target=self.run, args=[])
+        thread.start()
+
+    def run(self):
         self.bot.run_polling()
 
 

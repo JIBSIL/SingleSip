@@ -6,8 +6,10 @@ import src.process_data as process_data
 import src.train_model as train_model
 import src.config as config
 import src.utils as utils
+import src.telegram_bot as telegram
 
 import datetime as dt
+import os
 
 # no money is involved in this, just training and testing
 
@@ -23,8 +25,8 @@ import datetime as dt
     trading_fee,
     _,
     _,
-    _,
-    _,
+    telegram_api_key,
+    telegram_password,
     layer_neurons,
     layer_delta,
     epochs,
@@ -35,8 +37,36 @@ import datetime as dt
     parameters,
 ) = config.get_config()
 
+print(f"EVALUATION MODE: target={target}, parameters={parameters}")
+database = {}
+
+acceptable_evaluation_parameters = [
+    "layer-neurons",
+    "layer-delta",
+    "batchsize",
+    "window",
+    "lookback",
+]
+
+if not target in acceptable_evaluation_parameters:
+    print(
+        "Target is not within acceptable evaluation parameters. Please fix the target field in config.yaml"
+    )
+    exit(0)
+
+
+if opt_graph:
+    print(
+        "Graphing is not available in A/B testing mode. Please run dryrun.py for graphing (overriding user setting)"
+    )
+
+if not opt_backtest:
+    print("Backtesting is forced in A/B testing mode, overriding user setting.")
+
+opt_graph = False
+opt_backtest = True
+
 json = get_data(ticker, coinapi_apikey)
-# json = load_data(f"{ticker}.json")
 json = json[7500:]
 # print(len(json))
 
@@ -51,33 +81,95 @@ X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
     df_scaled, lookback, traintest_split
 )
 
-modelfound = False if model != None else True
-formatted_date = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-training_data = (
-    layer_neurons,
-    layer_delta,
-    epochs,
-    batchsize,
-    "models/evaluation_{ticker}_{formatted_date}.zip",
+telegram_bot = telegram.TelegramBot(telegram_api_key, telegram_password)
+telegram_bot.send_message(
+    f"✅ Starting A/B backtesting on ticker {ticker}\n(progress will be updated here)..."
 )
 
-model = train_model.train_model(
-    X_train, X_test, y_train, y_test, ticker, model, modelfound, training_data
-)
+i = 0
+for parameter in parameters:
+    print(f"Running A/B test for {target}={parameter}")
 
-num_features, num_features_backtest = evaluate_model.get_num_features()
+    if target == "layer-neurons":
+        layer_neurons = parameter
+    elif target == "layer-delta":
+        layer_delta = parameter
+    elif target == "batchsize":
+        batchsize = parameter
+    elif target == "window":
+        window = parameter
+    elif target == "lookback":
+        lookback = parameter
 
-if opt_backtest:
-    backtest.backtest(
-        model,
-        X_test,
-        y_test,
-        scaler,
-        ticker,
-        window,
-        lookback,
-        num_features,
-        num_features_backtest,
+    i += 1
+    modelfound = False if model != None else True
+    formatted_date = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    training_data = (
+        layer_neurons,
+        layer_delta,
+        epochs,
+        batchsize,
+        "models/evaluation_{ticker}_{formatted_date}.zip",
     )
 
-evaluate_model.evaluate_model(model, X_test, y_test, scaler, ticker, opt_graph)
+    model = train_model.train_model(
+        X_train, X_test, y_train, y_test, ticker, model, modelfound, training_data
+    )
+
+    num_features, num_features_backtest = evaluate_model.get_num_features()
+
+    if opt_backtest:
+        backtest.backtest(
+            model,
+            X_test,
+            y_test,
+            scaler,
+            ticker,
+            window,
+            lookback,
+            num_features,
+            num_features_backtest,
+        )
+
+    change_percent, stoploss_activated, gainloss, outperform = (
+        evaluate_model.evaluate_model(model, X_test, y_test, scaler, ticker, opt_graph)
+    )
+
+    database[parameter] = {
+        "change_percent": change_percent,
+        "stoploss_activated": stoploss_activated,
+        "gainloss": gainloss,
+        "outperform": outperform,
+    }
+
+    telegram_bot.send_message(
+        f"📈 Progress: {ticker}-{target}={parameter} finished - {i}/{len(parameters)} ({round(i / len(parameters), 2)})"
+    )
+
+print("A/B Testing Results:")
+for parameter in database:
+    print(f"Reading out results for {target}={parameter}")
+    for subparameter in parameter:
+        print(f"{subparameter}: {database[parameter][subparameter]}")
+
+print("A/B Testing Complete. Writing out to results.txt and Telegram")
+
+if os.path.exists("results.txt"):
+    os.remove("results.txt")
+
+with open("results.txt", "w") as file:
+    file.write("A/B Testing Results:\n")
+    for parameter in database:
+        file.write(f"Reading out results for {target}={parameter}\n")
+        for subparameter in parameter:
+            file.write(f"{subparameter}: {database[parameter][subparameter]}\n")
+
+# get results.txt content to write to tg
+with open("results.txt", "r") as file:
+    results = file.read()
+
+telegram_bot.send_message(
+    "A/B Testing Complete:\nResults: \n"
+    + results
+    + "\n\n✅ A/B Testing Complete. Results written to results.txt."
+)
