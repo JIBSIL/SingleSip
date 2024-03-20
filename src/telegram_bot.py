@@ -115,6 +115,9 @@ class TelegramBot:
         self.bot.add_handler(start_handler)
         self.bot.add_handler(authentication_handler)
         self.bot.add_handler(message_handler)
+        asyncio.create_task(self.run())
+    
+    async def run(self):
         self.bot.run_polling()
 
 

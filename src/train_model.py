@@ -7,33 +7,45 @@ import src.utils as utils
 export_model = True
 
 
-def export_model(model, ticker):
+def export_model(model, ticker, path):
     utils.cleanup_zip()
     if export_model:
-        filename = f"trained_{ticker}"
+        filename = f"models/trained_{ticker}"
     model.save(filename)
     shutil.make_archive(filename, "zip", filename)
     print(f"Saved the trained {ticker} weights")
 
 
 def train_model(
-    X_train, X_test, y_train, y_test, ticker, modelzipfile, train_model=True
+    X_train,
+    X_test,
+    y_train,
+    y_test,
+    ticker,
+    modelzipfile,
+    train_model=True,
+    evaluation_data=None,
 ):
+    # evaluation_data shape:
+    if evaluation_data is None:
+        evaluation_data = (175, 25, 100, 64, f"models/trained_{ticker}.zip")
+    layer1, layer_delta, epochs, batchsize, modelzip = evaluation_data
+
     if train_model:
         # LSTM Model with Optimizations
         model = tf.keras.models.Sequential(
             [
                 # Increased LSTM units, added return_sequences for stacking
                 tf.keras.layers.LSTM(
-                    200,
+                    layer1,
                     return_sequences=True,
                     input_shape=(X_train.shape[1], X_train.shape[2]),
                 ),
                 tf.keras.layers.Dropout(0.3),
                 # Additional LSTM layers
-                tf.keras.layers.LSTM(175, return_sequences=True),
+                tf.keras.layers.LSTM(layer1 - layer_delta, return_sequences=True),
                 tf.keras.layers.Dropout(0.3),
-                tf.keras.layers.LSTM(175, return_sequences=False),
+                tf.keras.layers.LSTM(layer1 - layer_delta, return_sequences=False),
                 tf.keras.layers.Dropout(0.2),
                 # Batch Normalization
                 tf.keras.layers.BatchNormalization(),
@@ -59,8 +71,8 @@ def train_model(
         model.fit(
             X_train,
             y_train,
-            epochs=100,
-            batch_size=64,
+            epochs=epochs,
+            batch_size=batchsize,
             validation_data=(X_test, y_test),
             callbacks=[early_stopping],
         )

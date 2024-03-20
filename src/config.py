@@ -25,6 +25,18 @@ def get_config():
     telegram_api_key = ""
     telegram_password = ""
 
+    # TRAINING OPTIONS
+    layer_neurons = 175
+    layer_delta = 25
+    epochs = 100
+    batchsize = 64
+
+    # TESTING OPTIONS
+    target = ""
+    parameters = []
+    opt_graph = False
+    opt_backtest = False
+
     # test if config.yaml exists
 
     if os.path.exists("config.yaml"):
@@ -46,6 +58,19 @@ def get_config():
             telegram_api_key = config["communication-options"]["telegram-api-key"]
             telegram_password = config["communication-options"]["telegram-password"]
 
+            telegram_api_key = config["communication-options"]["telegram-api-key"]
+            telegram_password = config["communication-options"]["telegram-password"]
+
+            layer_neurons = config["training-options"]["layer-neurons"]
+            layer_delta = config["training-options"]["layer-delta"]
+            epochs = config["training-options"]["epochs"]
+            batchsize = config["training-options"]["batchsize"]
+
+            target = config["testing-options"]["target"]
+            parameters = config["testing-options"]["parameters"]
+            opt_graph = config["testing-options"]["graph"]
+            opt_backtest = config["testing-options"]["backtest"]
+
             return (
                 ticker,
                 window,
@@ -60,6 +85,14 @@ def get_config():
                 poloniex_secret,
                 telegram_api_key,
                 telegram_password,
+                layer_neurons,
+                layer_delta,
+                epochs,
+                batchsize,
+                target,
+                opt_graph,
+                opt_backtest,
+                parameters,
             )
     else:
         print("config.yaml not found, using defaults")
@@ -80,6 +113,18 @@ def get_config():
             "communication-options": {
                 "telegram-api-key": telegram_api_key,
                 "telegram-password": telegram_password,
+            },
+            "training-options": {
+                "layer-neurons": layer_neurons,
+                "layer-delta": layer_delta,
+                "epochs": epochs,
+                "batchsize": batchsize,
+            },
+            "testing-options": {
+                "target": target,
+                "parameters": parameters,
+                "graph": opt_graph,
+                "backtest": opt_backtest,
             },
         }
 

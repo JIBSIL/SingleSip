@@ -13,6 +13,7 @@ import src.train_model as train_model
 import src.trade as trade
 import src.config as config
 import src.utils as utils
+import src.telegram_bot as telegram
 
 (
     ticker,
@@ -28,12 +29,22 @@ import src.utils as utils
     poloniex_secret,
     telegram_api_key,
     telegram_password,
+    layer_neurons,
+    layer_delta,
+    epochs,
+    batchsize,
+    target,
+    opt_graph,
+    opt_backtest,
+    parameters,
 ) = config.get_config()
 
-# EVALUATION OPTIONS
+if opt_backtest == True:
+    print(
+        "Backtesting is not available in the live version of SingleSip. Please run dryrun.py for backtesting."
+    )
 
-# OTHER OPTIONS
-opt_graph = False
+# EVALUATION OPTIONS
 
 # set up package based on options
 constant_data = (trading_fee, ticker, max_investment, max_trade)
@@ -54,13 +65,17 @@ X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
 
 modelfound = False if model != None else True
 
-# if os.path.isfile(model):
-#  modelfound = True
-# else:
-#  modelfound = False
+formatted_date = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+training_data = (
+    layer_neurons,
+    layer_delta,
+    epochs,
+    batchsize,
+    "models/evaluation_{ticker}_{formatted_date}.zip",
+)
 
 model = train_model.train_model(
-    X_train, X_test, y_train, y_test, ticker, model, modelfound
+    X_train, X_test, y_train, y_test, ticker, model, modelfound, training_data
 )
 
 num_features, num_features_backtest = evaluate_model.get_num_features()
@@ -75,9 +90,14 @@ print(f"\nIntializing trader on pair USDT_{ticker}...")
 trader = trade.Trader("USDC", ticker, poloniex_api_key, poloniex_secret)
 print("Trader initialized!\n")
 
+telegram_bot = telegram.TelegramBot(telegram_api_key, telegram_password)
+telegram_bot.send_message(
+    f"✅ Starting realtime trading on ticker USDT_{ticker} (dryrun off)..."
+)
+
 # initialize predictor
 predictor = prediction.Predictor(
-    ticker, lookback, coinapi_apikey, model, trader, constant_data
+    ticker, lookback, coinapi_apikey, model, trader, constant_data, telegram_bot
 )
 
 

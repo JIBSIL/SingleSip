@@ -6,6 +6,7 @@ import numpy as np
 import src.trade as tradeutil
 import src.process_data as process_data
 import src.evaluate_model as evaluate_model
+import src.telegram_bot as telegram
 
 
 def get_recent_data(ticker, apikey):
@@ -101,7 +102,14 @@ def execute_trade(
 
 class Predictor:
     def __init__(
-        self, ticker, lookback, apikey, model, trader: tradeutil.Trader, constant_data
+        self,
+        ticker,
+        lookback,
+        apikey,
+        model,
+        trader: tradeutil.Trader,
+        constant_data,
+        telegram_bot: telegram.TelegramBot,
     ):
         self.ticker = ticker
         self.lookback = lookback
@@ -109,6 +117,7 @@ class Predictor:
         self.model = model
         self.trader = trader
         self.constant_data = constant_data
+        self.telegram_bot = telegram_bot
 
         # setup changing data
         trades_buy = 0
@@ -176,6 +185,10 @@ class Predictor:
             )
             self.changing_data = changing_data_returned
 
+            self.telegram_bot.send_message(
+                f"⚠️ LIQUIDATION: Market change will be {round(predicted_change * 100, 2)}%. Liquidating {self.ticker} now."
+            )
+
             print(
                 f"Liquidation executed. {self.ticker} Balance: {round(btc_balance, 5)}, USD Balance: {round(balance, 2)}"
             )
@@ -190,6 +203,15 @@ class Predictor:
                 self.trader,
             )
             self.changing_data = changing_data_returned
+
+            if predicted_change < 0:
+                self.telegram_bot.send_message(
+                    f"⚠️ SELL: 📉 Market change will be {round(predicted_change * 100, 2)}%. Selling {self.ticker} now."
+                )
+            else:
+                self.telegram_bot.send_message(
+                    f"✅ BUY: 📈 Market change will be {round(predicted_change * 100, 2)}%. Buying {self.ticker} now."
+                )
 
             print(
                 f"Trade executed. {self.ticker} Balance: {round(btc_balance, 5)}, USD Balance: {round(balance, 2)}"

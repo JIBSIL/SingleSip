@@ -20,7 +20,7 @@ def execute_trade(
     model_was_right = None
 
     slippage = random.uniform(0, max_slippage)
-    max_trade = 0.4
+    max_trade = 0.2
     trade_amount = balance * max_trade  # Trading max_trade% of the balance
     if trade_amount > max_investment:
         trade_amount = max_investment
@@ -182,7 +182,7 @@ def backtest(
             print(
                 f"Liquidation executed. {ticker} Balance: {round(btc_balance, 5)}, USD Balance: {round(balance, 2)}"
             )
-        elif abs(predicted_change) > 0.05:
+        elif abs(predicted_change) > 0.04:
             balance, btc_balance, model_was_right = execute_trade(
                 predicted_price_tomorrow,
                 actual_price_today,

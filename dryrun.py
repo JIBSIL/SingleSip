@@ -7,7 +7,7 @@ import src.train_model as train_model
 import src.config as config
 import src.utils as utils
 
-# import trade
+import datetime as dt
 
 # no money is involved in this, just training and testing
 
@@ -23,15 +23,17 @@ import src.utils as utils
     trading_fee,
     _,
     _,
-    telegram_api_key,
-    telegram_password,
+    _,
+    _,
+    layer_neurons,
+    layer_delta,
+    epochs,
+    batchsize,
+    target,
+    opt_graph,
+    opt_backtest,
+    parameters,
 ) = config.get_config()
-
-# EVALUATION OPTIONS
-
-# OTHER OPTIONS
-opt_graph = True
-opt_backtest = True
 
 json = get_data(ticker, coinapi_apikey)
 # json = load_data(f"{ticker}.json")
@@ -50,8 +52,17 @@ X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
 )
 
 modelfound = False if model != None else True
+formatted_date = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+training_data = (
+    layer_neurons,
+    layer_delta,
+    epochs,
+    batchsize,
+    "models/evaluation_{ticker}_{formatted_date}.zip",
+)
+
 model = train_model.train_model(
-    X_train, X_test, y_train, y_test, ticker, model, modelfound
+    X_train, X_test, y_train, y_test, ticker, model, modelfound, training_data
 )
 
 num_features, num_features_backtest = evaluate_model.get_num_features()
