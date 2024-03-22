@@ -90,7 +90,8 @@ print(f"\nIntializing trader on pair USDT_{ticker}...")
 trader = trade.Trader("USDC", ticker, poloniex_api_key, poloniex_secret)
 print("Trader initialized!\n")
 
-telegram_bot = telegram.TelegramBot(telegram_api_key, telegram_password)
+telegram_bot = telegram.run_bot(telegram_api_key, telegram_password)
+
 telegram_bot.send_message(
     f"✅ Starting realtime trading on ticker USDT_{ticker} (dryrun off)..."
 )

@@ -58,7 +58,7 @@ training_data = (
     layer_delta,
     epochs,
     batchsize,
-    "models/evaluation_{ticker}_{formatted_date}.zip",
+    f"models/evaluation_{ticker}_{formatted_date}.zip",
 )
 
 model = train_model.train_model(

@@ -7,9 +7,9 @@ import src.utils as utils
 export_model = True
 
 
-def export_model(model, ticker, path):
+def export_model(model, ticker, filename=""):
     utils.cleanup_zip()
-    if export_model:
+    if not filename:
         filename = f"models/trained_{ticker}"
     model.save(filename)
     shutil.make_archive(filename, "zip", filename)
@@ -28,7 +28,7 @@ def train_model(
 ):
     # evaluation_data shape:
     if evaluation_data is None:
-        evaluation_data = (175, 25, 100, 64, f"models/trained_{ticker}.zip")
+        evaluation_data = (175, 25, 100, 64, f"models/trained_{ticker}")
     layer1, layer_delta, epochs, batchsize, modelzip = evaluation_data
 
     if train_model:
@@ -78,7 +78,7 @@ def train_model(
         )
 
         # save model
-        export_model(model, ticker)
+        export_model(model, ticker, modelzip)
 
         return model
     else:

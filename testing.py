@@ -81,7 +81,8 @@ X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
     df_scaled, lookback, traintest_split
 )
 
-telegram_bot = telegram.TelegramBot(telegram_api_key, telegram_password)
+telegram_bot = telegram.run_bot(telegram_api_key, telegram_password)
+
 telegram_bot.send_message(
     f"✅ Starting A/B backtesting on ticker {ticker}\n(progress will be updated here)..."
 )
@@ -102,24 +103,34 @@ for parameter in parameters:
         lookback = parameter
 
     i += 1
-    modelfound = False if model != None else True
+    # modelfound = False if model != None else True
+    modelfound = (
+        True  # set this to true to force training of new model (it's a bit backwards)
+    )
     formatted_date = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     training_data = (
         layer_neurons,
         layer_delta,
         epochs,
         batchsize,
-        "models/evaluation_{ticker}_{formatted_date}.zip",
+        f"models/evaluation_{ticker}_{formatted_date}",
     )
 
     model = train_model.train_model(
-        X_train, X_test, y_train, y_test, ticker, model, modelfound, training_data
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+        ticker,
+        f"models/evaluation_{ticker}_{target}={parameter}_{formatted_date}.zip",
+        modelfound,
+        training_data,
     )
 
     num_features, num_features_backtest = evaluate_model.get_num_features()
 
     if opt_backtest:
-        backtest.backtest(
+        change_percent, stoploss_activated, gainloss, outperform = backtest.backtest(
             model,
             X_test,
             y_test,
@@ -131,9 +142,7 @@ for parameter in parameters:
             num_features_backtest,
         )
 
-    change_percent, stoploss_activated, gainloss, outperform = (
-        evaluate_model.evaluate_model(model, X_test, y_test, scaler, ticker, opt_graph)
-    )
+    evaluate_model.evaluate_model(model, X_test, y_test, scaler, ticker, opt_graph)
 
     database[parameter] = {
         "change_percent": change_percent,
@@ -143,7 +152,9 @@ for parameter in parameters:
     }
 
     telegram_bot.send_message(
-        f"📈 Progress: {ticker}-{target}={parameter} finished - {i}/{len(parameters)} ({round(i / len(parameters), 2)})"
+        f"""📈 Progress: {ticker}-{target}={parameter} finished - {i}/{len(parameters)} ({round(100 * (i / len(parameters)), 2)}%)\n
+        Outperform: {outperform}\n
+        Stoploss Activated: {stoploss_activated}\n"""
     )
 
 print("A/B Testing Results:")

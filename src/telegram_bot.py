@@ -2,6 +2,7 @@
 
 import time
 import os
+import asyncio
 import threading
 from telegram import Update
 from telegram.ext import (
@@ -9,8 +10,10 @@ from telegram.ext import (
     ContextTypes,
     CommandHandler,
     MessageHandler,
+    Updater,
     filters,
 )
+import nest_asyncio
 
 if __name__ == "__main__":
     import src.config as config
@@ -95,36 +98,50 @@ class TelegramBot:
                     text='Incorrect password. Please try again or type "cancel".',
                 )
 
-    async def send_message(self, message):
+    def send_message(self, message):
         for user_id in self.database.authenticated_users:
-            await self.bot.send_message(chat_id=user_id, text=message)
+            asyncio.run(self.bot.send_message(chat_id=user_id, text=message))
 
     def __init__(self, token, password):
         self.token = token
-        self.bot = ApplicationBuilder().token(token).build()
         self.password = password
         self.database = TelegramDatastore()
         self.temporary_userstates = {}
+        self.application = ApplicationBuilder().token(self.token).build()
+        self.bot = self.application.bot
 
         start_handler = CommandHandler("start", self.start)
         authentication_handler = CommandHandler("authenticate", self.authenticate)
         message_handler = MessageHandler(
             filters.TEXT & (~filters.COMMAND), self.message_handler
         )
+        self.application.add_handler(start_handler)
+        self.application.add_handler(authentication_handler)
+        self.application.add_handler(message_handler)
 
-        self.bot.add_handler(start_handler)
-        self.bot.add_handler(authentication_handler)
-        self.bot.add_handler(message_handler)
-        thread = threading.Thread(target=self.run, args=[])
-        thread.start()
+    def run(self, loop=None):
+        # asyncio.set_event_loop(loop)
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        self.application.run_polling()
 
-    def run(self):
-        self.bot.run_polling()
+
+def run_bot(telegram_api_key, telegram_password):
+    nest_asyncio.apply()
+    print("Starting telegram bot (listening for commands)...")
+    bot = TelegramBot(telegram_api_key, telegram_password)
+    threading.Thread(target=bot.run, args=()).start()
+    return bot
+
+
+def run_cli():
+    settings = config.get_config()
+    telegram_api_key = settings[-10]
+    telegram_password = settings[-9]
+    run_bot(telegram_api_key, telegram_password)
+
+    while True:
+        time.sleep(1)
 
 
 if __name__ == "__main__":
-    settings = config.get_config()
-    telegram_api_key = settings[-2]
-    telegram_password = settings[-1]
-    print("Starting telegram bot (listening for commands)...")
-    TelegramBot(telegram_api_key, telegram_password)
+    run_cli()
