@@ -150,17 +150,20 @@ for parameter in parameters:
         "gainloss": gainloss,
         "outperform": outperform,
     }
-
-    telegram_bot.send_message(
-        f"""📈 Progress: {ticker}-{target}={parameter} finished - {i}/{len(parameters)} ({round(100 * (i / len(parameters)), 2)}%)\n
-        Outperform: {outperform}\n
-        Stoploss Activated: {stoploss_activated}\n"""
-    )
+    
+    msg = (f"📈 Progress: {ticker}-{target}={parameter} finished - {i}/{len(parameters)} ({round(100 * (i / len(parameters)), 2)}%)\n" +
+        f"Outperform: {outperform}\n" +
+        f"Stoploss Activated: {stoploss_activated}\n")
+    
+    if change_percent == 0.0:
+        msg += "ZeroDivError - model errored and made no trades"
+    
+    telegram_bot.send_message(msg)
 
 print("A/B Testing Results:")
 for parameter in database:
     print(f"Reading out results for {target}={parameter}")
-    for subparameter in parameter:
+    for subparameter in database[parameter]:
         print(f"{subparameter}: {database[parameter][subparameter]}")
 
 print("A/B Testing Complete. Writing out to results.txt and Telegram")
@@ -169,18 +172,20 @@ if os.path.exists("results.txt"):
     os.remove("results.txt")
 
 with open("results.txt", "w") as file:
-    file.write("A/B Testing Results:\n")
     for parameter in database:
-        file.write(f"Reading out results for {target}={parameter}\n")
-        for subparameter in parameter:
+        file.write(f"**Results for {target}={parameter}:**\n")
+        for subparameter in database[parameter]:
             file.write(f"{subparameter}: {database[parameter][subparameter]}\n")
+        file.write("\n")
 
 # get results.txt content to write to tg
 with open("results.txt", "r") as file:
     results = file.read()
 
 telegram_bot.send_message(
-    "A/B Testing Complete:\nResults: \n"
+    "A/B Testing Complete - Results: \n"
     + results
-    + "\n\n✅ A/B Testing Complete. Results written to results.txt."
+    + "\n✅ A/B Testing Complete. Results written to results.txt."
 )
+
+exit(0)

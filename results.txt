@@ -1,0 +1,12 @@
+**Results for batchsize=32:**
+change_percent: 162.82
+stoploss_activated: False
+gainloss: 53.51
+outperform: 109.31
+
+**Results for batchsize=16:**
+change_percent: 52.96
+stoploss_activated: False
+gainloss: 53.51
+outperform: -0.55
+

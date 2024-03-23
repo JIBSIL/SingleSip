@@ -3,7 +3,7 @@ import pandas as pd
 import json
 import requests
 import iso8601
-
+import os
 
 def load_data(file):
     dict = json.load(open(file))
@@ -12,6 +12,9 @@ def load_data(file):
 
 
 def get_data(ticker, apikey):
+    # make data folder
+    if not os.path.exists("data"):
+        os.makedirs("data")
     # test if data.json exists
     try:
         jsondata = load_data(f"data/{ticker}.json")

@@ -100,7 +100,7 @@ class TelegramBot:
 
     def send_message(self, message):
         for user_id in self.database.authenticated_users:
-            asyncio.run(self.bot.send_message(chat_id=user_id, text=message))
+            asyncio.run(self.bot.send_message(chat_id=user_id, text=message, parse_mode='Markdown'))
 
     def __init__(self, token, password):
         self.token = token

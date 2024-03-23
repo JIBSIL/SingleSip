@@ -290,9 +290,12 @@ def backtest(
     print(f"WINDOW: {window}")
     print(f"LOOKBACK: {lookback}")
     print()
-    print(
-        f"The model was right {model_right_amount} times and wrong {model_wrong_amount} times ({round((model_right_amount / (model_right_amount + model_wrong_amount)) * 100, 2)}%)"
-    )
+    try:
+        print(
+            f"The model was right {model_right_amount} times and wrong {model_wrong_amount} times ({round((model_right_amount / (model_right_amount + model_wrong_amount)) * 100, 2)}%)"
+        )
+    except ZeroDivisionError:
+        print(f"Model was right {model_right_amount} times and wrong {model_wrong_amount} times (ZeroDivError)")
 
     return (
         change_percent,
