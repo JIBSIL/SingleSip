@@ -37,7 +37,7 @@ def execute_trade(
         btc_balance += btc_bought - fee
         balance -= trade_amount
         buy_prediction = True
-        print(f"Buying {round(trade_amount, 2)}")
+        #print(f"Buying {round(trade_amount, 2)}")
 
     # Sell BTC
     elif predicted_price < actual_price:
@@ -49,16 +49,17 @@ def execute_trade(
         if gain < 0.1:
             # can't trade less than 10 cents
             return balance, btc_balance, model_was_right
-        print(
-            f'{"Selling" if liquidate == False else "Liquidating"} {btc_sold} {ticker} (${round(gain, 2)})'
-        )
+        #print(
+        #    f'{"Selling" if liquidate == False else "Liquidating"} {btc_sold} {ticker} (${round(gain, 2)})'
+        #)
         buy_prediction = False
         fee = gain * trading_fee
         balance += gain - fee
         btc_balance -= btc_sold
         trades_sell += 1
     else:
-        print("Prediction == target price! Holding")
+        #print("Prediction == target price! Holding")
+        pass
 
     global trades
     trades += 1
@@ -130,7 +131,7 @@ def backtest(
 
     # Simulation loop
     for i in range(len(predicted_prices_tomorrow)):
-        print(f"Today the portfolio is worth {round(btc_usd_balance_if_ending, 2)}")
+        #print(f"Today the portfolio is worth {round(btc_usd_balance_if_ending, 2)}")
         predicted_price_tomorrow = predicted_prices_tomorrow[i]
         actual_price_today = scaler.inverse_transform(
             np.concatenate(
@@ -156,12 +157,12 @@ def backtest(
         predicted_change = (
             predicted_price_tomorrow - actual_price_today
         ) / actual_price_today
-        print(
-            f"Actual price today: {actual_price_today}, Predicted price tomorrow: {predicted_price_tomorrow}"
-        )
-        print(
-            f"Model predicts market change will be {round(predicted_change * 100, 2)}%"
-        )
+        #print(
+        #    f"Actual price today: {actual_price_today}, Predicted price tomorrow: {predicted_price_tomorrow}"
+        #)
+        #print(
+        #    f"Model predicts market change will be {round(predicted_change * 100, 2)}%"
+        #)
         if predicted_change < -0.1:
             balance, btc_balance, model_was_right = execute_trade(
                 predicted_price_tomorrow,
@@ -179,9 +180,9 @@ def backtest(
                 model_wrong_amount += 1
             # else: the no trade happened
 
-            print(
-                f"Liquidation executed. {ticker} Balance: {round(btc_balance, 5)}, USD Balance: {round(balance, 2)}"
-            )
+            #print(
+            #    f"Liquidation executed. {ticker} Balance: {round(btc_balance, 5)}, USD Balance: {round(balance, 2)}"
+            #)
         elif abs(predicted_change) > 0.04:
             balance, btc_balance, model_was_right = execute_trade(
                 predicted_price_tomorrow,
@@ -198,9 +199,9 @@ def backtest(
                 model_wrong_amount += 1
             # else: the no trade happened
 
-            print(
-                f"Trade executed. {ticker} Balance: {round(btc_balance, 5)}, USD Balance: {round(balance, 2)}"
-            )
+            #print(
+            #    f"Trade executed. {ticker} Balance: {round(btc_balance, 5)}, USD Balance: {round(balance, 2)}"
+            #)
 
         # Implementing stoploss
         if (

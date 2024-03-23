@@ -10,6 +10,8 @@ import src.telegram_bot as telegram
 
 import datetime as dt
 import os
+import signal
+import shutil
 
 # no money is involved in this, just training and testing
 
@@ -81,11 +83,15 @@ X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
     df_scaled, lookback, traintest_split
 )
 
-telegram_bot = telegram.run_bot(telegram_api_key, telegram_password)
+telegram_bot, thread = telegram.run_bot(telegram_api_key, telegram_password)
 
 telegram_bot.send_message(
     f"✅ Starting A/B backtesting on ticker {ticker}\n(progress will be updated here)..."
 )
+
+# delete models/eval
+if os.path.exists("models/eval"):
+    shutil.rmtree("models/eval")
 
 i = 0
 for parameter in parameters:
@@ -113,7 +119,7 @@ for parameter in parameters:
         layer_delta,
         epochs,
         batchsize,
-        f"models/evaluation_{ticker}_{formatted_date}",
+        f"models/eval/evaluation_{ticker}_{formatted_date}",
     )
 
     model = train_model.train_model(
@@ -122,7 +128,7 @@ for parameter in parameters:
         y_train,
         y_test,
         ticker,
-        f"models/evaluation_{ticker}_{target}={parameter}_{formatted_date}.zip",
+        f"models/eval/evaluation_{ticker}_{target}={parameter}_{formatted_date}.zip",
         modelfound,
         training_data,
     )
@@ -171,21 +177,24 @@ print("A/B Testing Complete. Writing out to results.txt and Telegram")
 if os.path.exists("results.txt"):
     os.remove("results.txt")
 
+msg_telegram = "A/B Testing Results:\n\n"
+
 with open("results.txt", "w") as file:
     for parameter in database:
-        file.write(f"**Results for {target}={parameter}:**\n")
+        title = f"Results for {target}={parameter}:"
+        msg_telegram += f"**{title}**\n"
+        file.write(f"{title}\n")
         for subparameter in database[parameter]:
-            file.write(f"{subparameter}: {database[parameter][subparameter]}\n")
+            sanitized_param = subparameter.replace("_", "-")
+            subparam = f"{sanitized_param}: {database[parameter][subparameter]}\n"
+            msg_telegram += subparam
+            file.write(subparam)
         file.write("\n")
-
-# get results.txt content to write to tg
-with open("results.txt", "r") as file:
-    results = file.read()
+        msg_telegram += "\n"
 
 telegram_bot.send_message(
-    "A/B Testing Complete - Results: \n"
-    + results
-    + "\n✅ A/B Testing Complete. Results written to results.txt."
+    msg_telegram +
+    "\n✅ A/B Testing Complete. Results written to results.txt."
 )
 
-exit(0)
+os.kill(os.getpid(), signal.SIGTERM)

@@ -3,4 +3,5 @@ __pycache__
 config.yaml
 data
 trained_LTC
-models/evaluation*
+models/eval*
+results.txt

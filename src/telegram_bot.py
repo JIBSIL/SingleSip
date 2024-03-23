@@ -129,8 +129,9 @@ def run_bot(telegram_api_key, telegram_password):
     nest_asyncio.apply()
     print("Starting telegram bot (listening for commands)...")
     bot = TelegramBot(telegram_api_key, telegram_password)
-    threading.Thread(target=bot.run, args=()).start()
-    return bot
+    thread = threading.Thread(target=bot.run, args=())
+    thread.start()
+    return bot, thread
 
 
 def run_cli():
