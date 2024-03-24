@@ -1,24 +1,30 @@
-Results for layer-neurons=150:
-change-percent: -20.08
-stoploss-activated: False
-gainloss: -11.71
-outperform: -8.37
-
-Results for layer-neurons=125:
-change-percent: -20.3
-stoploss-activated: False
-gainloss: -25.73
-outperform: 5.43
-
-Results for layer-neurons=100:
-change-percent: -22.01
-stoploss-activated: False
-gainloss: -26.15
-outperform: 4.14
-
-Results for layer-neurons=75:
-change-percent: -6.57
+Results for layer-neurons=200:
+change-percent: 8.58
 stoploss-activated: False
 gainloss: -5.27
-outperform: -1.3
+outperform: 13.85
+
+Results for layer-neurons=175:
+change-percent: -21.18
+stoploss-activated: False
+gainloss: -25.61
+outperform: 4.43
+
+Results for layer-neurons=150:
+change-percent: -20.05
+stoploss-activated: False
+gainloss: -26.81
+outperform: 6.76
+
+Results for layer-neurons=125:
+change-percent: 35.31
+stoploss-activated: False
+gainloss: -5.27
+outperform: 40.58
+
+Results for layer-neurons=100:
+change-percent: 16.61
+stoploss-activated: False
+gainloss: -5.27
+outperform: 21.88
 
