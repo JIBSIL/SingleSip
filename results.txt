@@ -1,6 +1,24 @@
-Results for batchsize=32:
-change-percent: 164.39
+Results for layer-neurons=150:
+change-percent: -20.08
 stoploss-activated: False
-gainloss: 53.51
-outperform: 110.88
+gainloss: -11.71
+outperform: -8.37
+
+Results for layer-neurons=125:
+change-percent: -20.3
+stoploss-activated: False
+gainloss: -25.73
+outperform: 5.43
+
+Results for layer-neurons=100:
+change-percent: -22.01
+stoploss-activated: False
+gainloss: -26.15
+outperform: 4.14
+
+Results for layer-neurons=75:
+change-percent: -6.57
+stoploss-activated: False
+gainloss: -5.27
+outperform: -1.3
 

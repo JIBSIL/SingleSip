@@ -60,14 +60,14 @@ def evaluate_model(model, X_test, y_test, scaler, ticker, opt_graph):
         return num_features, num_features_backtest
 
     # Plot scaled predictions
-    plt.figure(figsize=(10, 6))
-    plt.plot(y_test[1:], label="Actual Price (scaled)")
-    plt.plot(predictions_scaled[1:], label="Predicted Price (scaled)")
-    plt.title(f"{ticker} Price Prediction (scaled)")
-    plt.xlabel("Time")
-    plt.ylabel("Price (scaled)")
-    plt.legend()
-    plt.show()
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(y_test[1:], label="Actual Price (scaled)")
+    # plt.plot(predictions_scaled[1:], label="Predicted Price (scaled)")
+    # plt.title(f"{ticker} Price Prediction (scaled)")
+    # plt.xlabel("Time")
+    # plt.ylabel("Price (scaled)")
+    # plt.legend()
+    # plt.show()
 
     # Plot unscaled predictions
     plt.figure(figsize=(10, 6))

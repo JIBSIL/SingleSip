@@ -134,7 +134,7 @@ def create_dataset(X, look_back=1):
     return np.array(Xs), np.array(ys)
 
 
-def prepare_training_dataset(df_scaled, lookback, split_length):
+def prepare_training_dataset(df_scaled, lookback, split_length, shuffle=False):
     # supervised learning format conversion
 
     # Selecting features and target
@@ -167,7 +167,8 @@ def prepare_training_dataset(df_scaled, lookback, split_length):
     # chunked_indices.pop(0)
 
     # Shuffle the chunks (disabled UNLESS you want to test on different parts of the price)
-    # np.random.shuffle(chunked_indices)
+    if shuffle:
+        np.random.shuffle(chunked_indices)
 
     # Concatenate the shuffled chunks back
     shuffled_indices = np.concatenate(chunked_indices)

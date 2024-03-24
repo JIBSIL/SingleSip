@@ -69,8 +69,7 @@ opt_graph = False
 opt_backtest = True
 
 json = get_data(ticker, coinapi_apikey)
-json = json[7500:]
-# print(len(json))
+json = json[7500:] # remove last 7500 parts of data
 
 # before we get started, clean up from previous runs
 utils.cleanup_last_generation()
@@ -119,7 +118,7 @@ for parameter in parameters:
         layer_delta,
         epochs,
         batchsize,
-        f"models/eval/evaluation_{ticker}_{formatted_date}",
+        f"models/eval/evaluation_{ticker}_{target}={parameter}_{formatted_date}",
     )
 
     model = train_model.train_model(

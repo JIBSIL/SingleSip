@@ -50,7 +50,8 @@ def train_model(
                 # Batch Normalization
                 tf.keras.layers.BatchNormalization(),
                 # Increased Dense layer neurons
-                tf.keras.layers.Dense(50, activation="relu"),
+                # https://ijisrt.com/wp-content/uploads/2019/06/IJISRT19JU92.pdf
+                tf.keras.layers.Dense(64, activation="relu"),
                 # Output layer
                 tf.keras.layers.Dense(1),
             ]
