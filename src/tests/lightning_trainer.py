@@ -23,7 +23,12 @@ import matplotlib.pyplot as plt
 # majority of this code is adapted from https://www.kaggle.com/code/shreyasajal/pytorch-forecasting-for-time-series-forecasting
 
 # this integrated function will probably be shifted if the module is expanded
-def prepare_and_train(df_train):
+def prepare_and_train(df_train, model_name):
+    
+    if model_name != None and model_name != "":
+        model = TemporalFusionTransformer.load_from_checkpoint(model_name)
+        return model
+    
     max_prediction_length = 1
     max_encoder_length = 27
     #training_cutoff = df_train['date_block_num'].max() - max_prediction_length
@@ -134,3 +139,9 @@ def prepare_and_train(df_train):
     
     criterion = nn.MSELoss()
     print(torch.sqrt(criterion(actuals, val_predictions)))
+    
+    return best_tft, validation
+
+# def load_and_measure_loss(model_path):
+#     best_tft = TemporalFusionTransformer.load_from_checkpoint(model_path)
+    

@@ -52,41 +52,55 @@ df_scaled, scaler = process_data.add_technical_indicators(
 if tests["lightning"]:
     import src.tests.lightning_trainer as lightning
     
-    lightning.prepare_and_train(df_scaled)
+    model, dset_val = lightning.prepare_and_train(df_scaled, model)
+    #exit(0)
+else:
+    X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
+        df_scaled, lookback, traintest_split
+    )
     
-    exit(0)
+    modelfound = False if model != None else True
+    formatted_date = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    training_data = (
+        layer_neurons,
+        layer_delta,
+        epochs,
+        batchsize,
+        f"models/evaluation_{ticker}_{formatted_date}.zip",
+    )
 
-X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
-    df_scaled, lookback, traintest_split
-)
+    model = train_model.train_model(
+        X_train, X_test, y_train, y_test, ticker, model, modelfound, training_data
+    )
 
-modelfound = False if model != None else True
-formatted_date = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-training_data = (
-    layer_neurons,
-    layer_delta,
-    epochs,
-    batchsize,
-    f"models/evaluation_{ticker}_{formatted_date}.zip",
-)
-
-model = train_model.train_model(
-    X_train, X_test, y_train, y_test, ticker, model, modelfound, training_data
-)
-
-num_features, num_features_backtest = evaluate_model.get_num_features()
+    num_features, num_features_backtest = evaluate_model.get_num_features()
 
 if opt_backtest:
-    backtest.backtest(
-        model,
-        X_test,
-        y_test,
-        scaler,
-        ticker,
-        window,
-        lookback,
-        num_features,
-        num_features_backtest,
-    )
+    if tests["lightning"]:
+        import src.tests.lightning_backtest as lightning_backtest
+        
+        num_features, num_features_backtest = evaluate_model.get_num_features()
+        lightning_backtest.backtest(
+            model,
+            dset_val,
+            scaler,
+            ticker,
+            window,
+            lookback,
+            num_features,
+            num_features_backtest,
+        )
+    else:
+        backtest.backtest(
+            model,
+            X_test,
+            y_test,
+            scaler,
+            ticker,
+            window,
+            lookback,
+            num_features,
+            num_features_backtest,
+        )
 
 evaluate_model.evaluate_model(model, X_test, y_test, scaler, ticker, opt_graph)
