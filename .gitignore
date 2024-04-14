@@ -5,3 +5,6 @@ data
 trained_LTC
 models/eval*
 results.txt
+lightning_logs
+.lr_find_*
+models/lightning/test
