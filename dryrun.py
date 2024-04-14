@@ -49,16 +49,22 @@ df_scaled, scaler = process_data.add_technical_indicators(
     df_merged, window, traintest_split
 )
 
+X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
+    df_scaled, lookback, traintest_split
+)
+
 if tests["lightning"]:
     import src.tests.lightning_trainer as lightning
     
-    model, dset_val = lightning.prepare_and_train(df_scaled, model)
+    features = process_data.get_features()
+
+    X_train_df = pd.DataFrame(X_train, columns=features["features"])
+    y_train_df = pd.DataFrame(y_train, columns=features["target"])
+    train_df = pd.concat([y_train_df, X_train_df], axis=1)
+    
+    model, dset_val = lightning.prepare_and_train(train_df, model)
     #exit(0)
 else:
-    X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
-        df_scaled, lookback, traintest_split
-    )
-    
     modelfound = False if model != None else True
     formatted_date = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     training_data = (
@@ -82,7 +88,8 @@ if opt_backtest:
         num_features, num_features_backtest = evaluate_model.get_num_features()
         lightning_backtest.backtest(
             model,
-            dset_val,
+            X_test,
+            y_test,
             scaler,
             ticker,
             window,

@@ -1,6 +1,7 @@
 import numpy as np
+import pandas as pd
 import random
-import pytorch_forecasting
+import src.process_data as process_data
 
 def execute_trade(
     predicted_price,
@@ -79,7 +80,8 @@ def execute_trade(
 
 def backtest(
     model,
-    dset_val: pytorch_forecasting.TimeSeriesDataSet,
+    X_test,
+    y_test,
     scaler,
     ticker,
     window,
@@ -106,14 +108,12 @@ def backtest(
     trades = 0
     trades_sell = 0
     trades_buy = 0
-    
-    #dframe = dset_val.data
-    #y_test = dframe["target"].values
 
     # prepare implied values array (does not change)
     implied_values = [max_slippage, max_investment, trading_fee, ticker]
-
-    predictions_scaled = model.predict(dset_val)
+    
+    X_test_df = pd.DataFrame(X_test, columns=process_data.get_features()["features"])
+    predictions_scaled = model.predict(X_test_df).detach().cpu().numpy()
 
     # predicted_prices_tomorrow = scaler.inverse_transform(np.concatenate((predictions_scaled, np.zeros((predictions_scaled.shape[0], 2))), axis=1))[:, 0]
 
@@ -122,8 +122,8 @@ def backtest(
     predicted_prices_tomorrow = scaler.inverse_transform(full_array)[:, 0]
 
     predicted_prices_tomorrow = predicted_prices_tomorrow[1:]
-    #X_test = X_test[1:]
-    #y_test = y_test[1:]
+    X_test = X_test[1:]
+    y_test = y_test[1:]
 
     # stats
     model_right_amount = 0
@@ -135,21 +135,18 @@ def backtest(
     for i in range(len(predicted_prices_tomorrow)):
         #print(f"Today the portfolio is worth {round(btc_usd_balance_if_ending, 2)}")
         predicted_price_tomorrow = predicted_prices_tomorrow[i]
-        print(dset_val[i])
         actual_price_today = scaler.inverse_transform(
             np.concatenate(
-                #(y_test[i].reshape(-1, 1), np.zeros((1, num_features_backtest))), axis=1
-                (dset_val[i].reshape(-1, 1), np.zeros((1, num_features_backtest))), axis=1
+                (y_test[i].reshape(-1, 1), np.zeros((1, num_features_backtest))), axis=1
             )
         )[0, 0]
 
         # see if we can seek 1 forward
-        if (i + 1) < (len(dset_val) - 1):
+        if (i + 1) < (len(y_test) - 1):
             actual_price_tomorrow = scaler.inverse_transform(
                 np.concatenate(
                     (
-                        #y_test[i + 1].reshape(-1, 1),
-                        dset_val[i + 1].reshape(-1, 1),
+                        y_test[i + 1].reshape(-1, 1),
                         np.zeros((1, num_features_backtest)),
                     ),
                     axis=1,
@@ -223,8 +220,7 @@ def backtest(
             stoploss = True
             btc_end_override = scaler.inverse_transform(
                 np.concatenate(
-                    #(y_test[i].reshape(-1, 1), np.zeros((1, num_features_backtest))),
-                    (dset_val[i].reshape(-1, 1), np.zeros((1, num_features_backtest))),
+                    (y_test[i].reshape(-1, 1), np.zeros((1, num_features_backtest))),
                     axis=1,
                 )
             )[0, 0]
@@ -248,8 +244,7 @@ def backtest(
 
     btc_start = scaler.inverse_transform(
         np.concatenate(
-            # (y_test[0].reshape(-1, 1), np.zeros((1, num_features_backtest))), axis=1
-            (dset_val[0].reshape(-1, 1), np.zeros((1, num_features_backtest))), axis=1
+            (y_test[0].reshape(-1, 1), np.zeros((1, num_features_backtest))), axis=1
         )
     )[0, 0]
 
@@ -258,8 +253,7 @@ def backtest(
         btc_end = scaler.inverse_transform(
             np.concatenate(
                 (
-                    # y_test[len(y_test) - 1].reshape(-1, 1),
-                    dset_val[len(dset_val) - 1].reshape(-1, 1),
+                    y_test[len(y_test) - 1].reshape(-1, 1),
                     np.zeros((1, num_features_backtest)),
                 ),
                 axis=1,

@@ -135,22 +135,27 @@ def create_dataset(X, look_back=1):
         ys.append(X.iloc[i + look_back, 0])
     return np.array(Xs), np.array(ys)
 
-
-def prepare_training_dataset(df_scaled, lookback, split_length, shuffle=False):
-    # supervised learning format conversion
-
-    # Selecting features and target
-    features = df_scaled[
-        [
+def get_features():
+    return {
+        "features": [
             "3_day_avg_price",
             "tsi",
             "rsi",
             "sharpe_ratio",
             "Bollinger_Upper",
             "Bollinger_Lower",
-        ]
-    ]
-    target = df_scaled[["PRICE"]]
+        ],
+        "target": ["PRICE"]
+    }
+
+def prepare_training_dataset(df_scaled, lookback, split_length, shuffle=False):
+    # supervised learning format conversion
+    
+    df_features = get_features()
+
+    # Selecting features and target
+    features = df_scaled[df_features["features"]]
+    target = df_scaled[df_features["target"]]
 
     # Create the dataset for supervised learning
     X, y = create_dataset(pd.concat([target, features], axis=1), lookback)

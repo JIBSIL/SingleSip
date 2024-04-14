@@ -25,10 +25,6 @@ import matplotlib.pyplot as plt
 # this integrated function will probably be shifted if the module is expanded
 def prepare_and_train(df_train, model_name):
     
-    if model_name != None and model_name != "":
-        model = TemporalFusionTransformer.load_from_checkpoint(model_name)
-        return model
-    
     max_prediction_length = 1
     max_encoder_length = 27
     #training_cutoff = df_train['date_block_num'].max() - max_prediction_length
@@ -52,6 +48,10 @@ def prepare_and_train(df_train, model_name):
     )
     
     validation = TimeSeriesDataSet.from_dataset(training, df_train, stop_randomization=True)
+    
+    if model_name != None and model_name != "":
+        model = TemporalFusionTransformer.load_from_checkpoint(model_name)
+        return model, validation
 
     batch_size = 128
     train_dataloader = training.to_dataloader(train=True, batch_size=batch_size)
@@ -93,8 +93,8 @@ def prepare_and_train(df_train, model_name):
     )
 
     print(f"suggested learning rate: {res.suggestion()}")
-    # fig = res.plot(show=True, suggest=True)
-    # fig.show()
+    fig = res.plot(show=True, suggest=True)
+    fig.show()
     
     early_stop_callback = EarlyStopping(monitor="val_loss", min_delta=1e-7, patience=10, verbose=False, mode="min")
     lr_logger = LearningRateMonitor()  
