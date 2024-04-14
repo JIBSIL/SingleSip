@@ -37,6 +37,7 @@ import src.telegram_bot as telegram
     opt_graph,
     opt_backtest,
     parameters,
+    tests
 ) = config.get_config()
 
 if opt_backtest == True:

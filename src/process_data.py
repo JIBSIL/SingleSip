@@ -121,6 +121,8 @@ def add_technical_indicators(df_stats, window, data_train_test):
     )
     print(f"Total length of dataset: {total_len_delta}")
     print(f"Length of test dataset: {total_len_delta * data_train_test}")
+    
+    df_scaled["IDX"] = range(0, len(df_scaled))
 
     return df_scaled, scaler
 

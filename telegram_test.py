@@ -10,6 +10,6 @@ def run_bot(telegram_api_key, telegram_password):
 
 if __name__ == "__main__":
     settings = config.get_config()
-    telegram_api_key = settings[-10]
-    telegram_password = settings[-9]
+    telegram_api_key = settings[-11]
+    telegram_password = settings[-10]
     run_bot(telegram_api_key, telegram_password)

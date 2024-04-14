@@ -36,6 +36,9 @@ def get_config():
     parameters = []
     opt_graph = False
     opt_backtest = False
+    
+    # MORE TESTING OPTIONS
+    lightning = False
 
     # test if config.yaml exists
 
@@ -70,6 +73,10 @@ def get_config():
             parameters = config["testing-options"]["parameters"]
             opt_graph = config["testing-options"]["graph"]
             opt_backtest = config["testing-options"]["backtest"]
+            
+            tests = {
+                "lightning": config["tests"]["lightning"]
+            }
 
             return (
                 ticker,
@@ -93,6 +100,7 @@ def get_config():
                 opt_graph,
                 opt_backtest,
                 parameters,
+                tests
             )
     else:
         print("config.yaml not found, using defaults")
@@ -126,6 +134,9 @@ def get_config():
                 "graph": opt_graph,
                 "backtest": opt_backtest,
             },
+            "tests": {
+                "lightning": lightning
+            }
         }
 
         yaml.dump(config, open("config.yaml", "w"))

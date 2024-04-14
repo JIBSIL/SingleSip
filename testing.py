@@ -37,6 +37,7 @@ import shutil
     opt_graph,
     opt_backtest,
     parameters,
+    tests
 ) = config.get_config()
 
 print(f"EVALUATION MODE: target={target}, parameters={parameters}")

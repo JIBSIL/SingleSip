@@ -33,6 +33,7 @@ import datetime as dt
     opt_graph,
     opt_backtest,
     parameters,
+    tests
 ) = config.get_config()
 
 json = get_data(ticker, coinapi_apikey)
@@ -47,6 +48,14 @@ df_merged = process_data.process_data(json)
 df_scaled, scaler = process_data.add_technical_indicators(
     df_merged, window, traintest_split
 )
+
+if tests["lightning"]:
+    import src.tests.lightning_trainer as lightning
+    
+    lightning.prepare_and_train(df_scaled)
+    
+    exit(0)
+
 X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
     df_scaled, lookback, traintest_split
 )

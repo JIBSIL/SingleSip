@@ -38,6 +38,7 @@ import signal
     opt_graph,
     opt_backtest,
     parameters,
+    tests
 ) = config.get_config()
 
 if model == "":
@@ -87,7 +88,7 @@ def evaluate_full(modeL_name):
     outperforms = []
     stoploss_activated_times = 0
 
-    for _ in range(20):
+    for _ in range(100):
         X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
             df_scaled, lookback, traintest_split, shuffle=True
         )

@@ -65,7 +65,11 @@ def train_model(
 
         # Early Stopping Callback
         early_stopping = tf.keras.callbacks.EarlyStopping(
-            monitor="val_loss", patience=20, restore_best_weights=True
+            monitor="val_loss", 
+            #patience=20, 
+            patience=2,
+            mode='min',
+            restore_best_weights=True
         )
 
         # Adjust the fit method to include callbacks and potentially longer training
