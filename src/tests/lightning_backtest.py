@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import random
 import src.process_data as process_data
+from pytorch_forecasting import TimeSeriesDataSet
 
 def execute_trade(
     predicted_price,
@@ -112,8 +113,36 @@ def backtest(
     # prepare implied values array (does not change)
     implied_values = [max_slippage, max_investment, trading_fee, ticker]
     
-    X_test_df = pd.DataFrame(X_test, columns=process_data.get_features()["features"])
-    predictions_scaled = model.predict(X_test_df).detach().cpu().numpy()
+    features = ["IDX"]
+    features += process_data.get_features()["features"]
+    
+    X_test_df = pd.DataFrame(X_test.reshape(X_test.shape[0], -1), columns=features)
+    X_test_df["IDX"] = range(0, len(X_test_df))
+    # set price to 0 so that timeseriesdataset will parse
+    X_test_df["PRICE"] = [0 for _ in range(0, len(X_test_df))]
+    
+    # this is copied from lightning_trainer
+    max_prediction_length = 1
+    max_encoder_length = 27
+    dataset = TimeSeriesDataSet(
+        X_test_df,
+        time_idx='IDX',
+        target="PRICE",
+        group_ids=["3_day_avg_price", "tsi", "rsi", "sharpe_ratio", "Bollinger_Upper", "Bollinger_Lower"],
+        min_encoder_length=0,  
+        max_encoder_length=max_encoder_length,
+        min_prediction_length=1,
+        max_prediction_length=max_prediction_length,
+        static_categoricals=[],
+        time_varying_unknown_categoricals=[],
+        time_varying_unknown_reals=[], #['PRICE'],
+        add_relative_time_idx=True,
+        add_target_scales=True,
+        add_encoder_length=True,
+        allow_missing_timesteps=True
+    )
+    
+    predictions_scaled = model.predict(dataset).detach().cpu().numpy()
 
     # predicted_prices_tomorrow = scaler.inverse_transform(np.concatenate((predictions_scaled, np.zeros((predictions_scaled.shape[0], 2))), axis=1))[:, 0]
 

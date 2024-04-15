@@ -40,7 +40,7 @@ def prepare_and_train(df_train, model_name):
         max_prediction_length=max_prediction_length,
         static_categoricals=[],
         time_varying_unknown_categoricals=[],
-        time_varying_unknown_reals=['PRICE'],
+        time_varying_unknown_reals=[], #['PRICE'],
         add_relative_time_idx=True,
         add_target_scales=True,
         add_encoder_length=True,
@@ -93,8 +93,8 @@ def prepare_and_train(df_train, model_name):
     )
 
     print(f"suggested learning rate: {res.suggestion()}")
-    fig = res.plot(show=True, suggest=True)
-    fig.show()
+    # fig = res.plot(show=True, suggest=True)
+    # fig.show()
     
     early_stop_callback = EarlyStopping(monitor="val_loss", min_delta=1e-7, patience=10, verbose=False, mode="min")
     lr_logger = LearningRateMonitor()  

@@ -49,6 +49,11 @@ df_scaled, scaler = process_data.add_technical_indicators(
     df_merged, window, traintest_split
 )
 
+if tests["lightning"]:
+    if lookback != 1:
+        print("Lookback must be 1 for pytorch-lightning. Setting lookback to 1...")
+    lookback = 1
+
 X_train, X_test, y_train, y_test = process_data.prepare_training_dataset(
     df_scaled, lookback, traintest_split
 )
@@ -57,10 +62,16 @@ if tests["lightning"]:
     import src.tests.lightning_trainer as lightning
     
     features = process_data.get_features()
+    
+    feature_x_dim = features["features"]
+    feature_x_dim.append("IDX")
 
-    X_train_df = pd.DataFrame(X_train, columns=features["features"])
+    X_train_df = pd.DataFrame(X_train.reshape(X_train.shape[0], -1), columns=feature_x_dim)
     y_train_df = pd.DataFrame(y_train, columns=features["target"])
+    
     train_df = pd.concat([y_train_df, X_train_df], axis=1)
+    train_df["IDX"] = range(0, len(train_df))
+    #print(train_df.head())
     
     model, dset_val = lightning.prepare_and_train(train_df, model)
     #exit(0)
