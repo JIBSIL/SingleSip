@@ -51,7 +51,7 @@ if opt_backtest == True:
 constant_data = (trading_fee, ticker, max_investment, max_trade)
 
 json = get_data(ticker, coinapi_apikey)
-json = json[2500:]
+json = json[7500:]
 
 # before we get started, clean up from previous runs
 utils.cleanup_last_generation()
@@ -87,11 +87,11 @@ for _ in range(5):
     print()
 print("Starting trading (dryrun DISABLED)")
 
-print(f"\nIntializing trader on pair USDT_{ticker}...")
+print(f"\nIntializing trader on pair USDC_{ticker}...")
 trader = trade.Trader("USDC", ticker, poloniex_api_key, poloniex_secret)
 print("Trader initialized!\n")
 
-telegram_bot = telegram.run_bot(telegram_api_key, telegram_password)
+telegram_bot, thread = telegram.run_bot(telegram_api_key, telegram_password)
 
 telegram_bot.send_message(
     f"✅ Starting realtime trading on ticker USDT_{ticker} (dryrun off)..."
