@@ -83,6 +83,7 @@ def backtest(
     model,
     X_test,
     y_test,
+    test_df,
     scaler,
     ticker,
     window,
@@ -113,19 +114,21 @@ def backtest(
     # prepare implied values array (does not change)
     implied_values = [max_slippage, max_investment, trading_fee, ticker]
     
-    features = ["IDX"]
-    features += process_data.get_features()["features"]
+    # features = process_data.get_features()["features"]
+    # features += ["IDX"]
     
-    X_test_df = pd.DataFrame(X_test.reshape(X_test.shape[0], -1), columns=features)
-    X_test_df["IDX"] = range(0, len(X_test_df))
-    # set price to 0 so that timeseriesdataset will parse
-    X_test_df["PRICE"] = [0 for _ in range(0, len(X_test_df))]
+    # X_test_df = pd.DataFrame(X_test.reshape(X_test.shape[0], -1), columns=features)
+    # X_test_df["IDX"] = range(0, len(X_test_df))
+    # print(X_test_df)
     
-    # this is copied from lightning_trainer
-    max_prediction_length = 1
+    # decoder_data = X_test_df
     max_encoder_length = 27
-    dataset = TimeSeriesDataSet(
-        X_test_df,
+    max_prediction_length = 1
+    # encoder_data = X_test_df[lambda x: x.IDX > x.IDX.max() - max_encoder_length]
+    # new_prediction_data = pd.concat([encoder_data, decoder_data], ignore_index=True)
+    
+    training = TimeSeriesDataSet(
+        test_df,
         time_idx='IDX',
         target="PRICE",
         group_ids=["3_day_avg_price", "tsi", "rsi", "sharpe_ratio", "Bollinger_Upper", "Bollinger_Lower"],
@@ -141,8 +144,8 @@ def backtest(
         add_encoder_length=True,
         allow_missing_timesteps=True
     )
-    
-    predictions_scaled = model.predict(dataset).detach().cpu().numpy()
+        
+    predictions_scaled = model.predict(training).detach().cpu().numpy()
 
     # predicted_prices_tomorrow = scaler.inverse_transform(np.concatenate((predictions_scaled, np.zeros((predictions_scaled.shape[0], 2))), axis=1))[:, 0]
 

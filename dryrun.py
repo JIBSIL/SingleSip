@@ -71,6 +71,13 @@ if tests["lightning"]:
     
     train_df = pd.concat([y_train_df, X_train_df], axis=1)
     train_df["IDX"] = range(0, len(train_df))
+    
+    X_test_df = pd.DataFrame(X_test.reshape(X_test.shape[0], -1), columns=feature_x_dim)
+    y_test_df = pd.DataFrame(y_test, columns=features["target"])
+    test_df = pd.concat([y_test_df, X_test_df], axis=1)
+    test_df["IDX"] = range(0, len(test_df))
+    
+    #print(train_df)
     #print(train_df.head())
     
     model, dset_val = lightning.prepare_and_train(train_df, model)
@@ -101,6 +108,7 @@ if opt_backtest:
             model,
             X_test,
             y_test,
+            test_df,
             scaler,
             ticker,
             window,
@@ -121,4 +129,5 @@ if opt_backtest:
             num_features_backtest,
         )
 
-evaluate_model.evaluate_model(model, X_test, y_test, scaler, ticker, opt_graph)
+if not tests["lightning"]:
+    evaluate_model.evaluate_model(model, X_test, y_test, scaler, ticker, opt_graph)
