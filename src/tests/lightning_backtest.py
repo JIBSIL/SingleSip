@@ -84,6 +84,7 @@ def backtest(
     X_test,
     y_test,
     test_df,
+    train_df,
     scaler,
     ticker,
     window,
@@ -114,8 +115,8 @@ def backtest(
     # prepare implied values array (does not change)
     implied_values = [max_slippage, max_investment, trading_fee, ticker]
     
-    # features = process_data.get_features()["features"]
-    # features += ["IDX"]
+    features = process_data.get_features()["features"]
+    features += ["IDX"]
     
     # X_test_df = pd.DataFrame(X_test.reshape(X_test.shape[0], -1), columns=features)
     # X_test_df["IDX"] = range(0, len(X_test_df))
@@ -127,31 +128,28 @@ def backtest(
     # encoder_data = X_test_df[lambda x: x.IDX > x.IDX.max() - max_encoder_length]
     # new_prediction_data = pd.concat([encoder_data, decoder_data], ignore_index=True)
     
-    training = TimeSeriesDataSet(
-        test_df,
-        time_idx='IDX',
-        target="PRICE",
-        group_ids=["3_day_avg_price", "tsi", "rsi", "sharpe_ratio", "Bollinger_Upper", "Bollinger_Lower"],
-        min_encoder_length=0,  
-        max_encoder_length=max_encoder_length,
-        min_prediction_length=1,
-        max_prediction_length=max_prediction_length,
-        static_categoricals=[],
-        time_varying_unknown_categoricals=[],
-        time_varying_unknown_reals=[], #['PRICE'],
-        add_relative_time_idx=True,
-        add_target_scales=True,
-        add_encoder_length=True,
-        allow_missing_timesteps=True
-    )
-        
-    predictions_scaled = model.predict(training).detach().cpu().numpy()
+    print(test_df)
+    
+    prediction_steps = test_df['IDX'].nunique()
+    encoder_data = train_df[lambda x: x.IDX > x.IDX.max() - max_encoder_length]
+    last_data = train_df[train_df['IDX'].isin([idx  -  prediction_steps for idx in train_df['IDX'].unique()])]
+    last_data['IDX'] = last_data['IDX'] + prediction_steps
+    decoder_data = pd.merge(test_df[[col for col in test_df.columns if 'PRICE' not in col]], 
+            last_data[features],
+            on = ["3_day_avg_price", "tsi", "rsi",]
+            )
+
+    new_prediction_data = pd.concat([encoder_data, decoder_data], ignore_index=True)
+    print(new_prediction_data)
+    predictions_scaled = model.predict(new_prediction_data, mode="prediction").detach().cpu().numpy()
 
     # predicted_prices_tomorrow = scaler.inverse_transform(np.concatenate((predictions_scaled, np.zeros((predictions_scaled.shape[0], 2))), axis=1))[:, 0]
 
     full_array = np.zeros((predictions_scaled.shape[0], num_features))
     full_array[:, :2] = predictions_scaled
     predicted_prices_tomorrow = scaler.inverse_transform(full_array)[:, 0]
+    print(len(predicted_prices_tomorrow))
+    print(predicted_prices_tomorrow)
 
     predicted_prices_tomorrow = predicted_prices_tomorrow[1:]
     X_test = X_test[1:]
@@ -217,7 +215,7 @@ def backtest(
             #print(
             #    f"Liquidation executed. {ticker} Balance: {round(btc_balance, 5)}, USD Balance: {round(balance, 2)}"
             #)
-        elif abs(predicted_change) > 0.04:
+        elif abs(predicted_change) > 0:
             balance, btc_balance, model_was_right = execute_trade(
                 predicted_price_tomorrow,
                 actual_price_today,

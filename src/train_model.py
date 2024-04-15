@@ -30,6 +30,7 @@ def train_model(
     if evaluation_data is None:
         evaluation_data = (175, 25, 100, 64, f"models/trained_{ticker}")
     layer1, layer_delta, epochs, batchsize, modelzip = evaluation_data
+    tf.random.set_seed(42)
 
     if train_model:
         # LSTM Model with Optimizations
@@ -66,8 +67,8 @@ def train_model(
         # Early Stopping Callback
         early_stopping = tf.keras.callbacks.EarlyStopping(
             monitor="val_loss", 
-            #patience=20, 
-            patience=2,
+            patience=20, 
+            #patience=2,
             mode='min',
             restore_best_weights=True
         )

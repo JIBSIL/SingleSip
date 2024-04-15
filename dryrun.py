@@ -8,6 +8,7 @@ import src.config as config
 import src.utils as utils
 
 import datetime as dt
+import numpy as np
 
 # no money is involved in this, just training and testing
 
@@ -72,8 +73,11 @@ if tests["lightning"]:
     train_df = pd.concat([y_train_df, X_train_df], axis=1)
     train_df["IDX"] = range(0, len(train_df))
     
+    y_test_mock = np.array([0.0 for _ in range(0, len(y_test))])
+    
     X_test_df = pd.DataFrame(X_test.reshape(X_test.shape[0], -1), columns=feature_x_dim)
-    y_test_df = pd.DataFrame(y_test, columns=features["target"])
+    y_test_df = pd.DataFrame(y_test_mock, columns=features["target"])
+    
     test_df = pd.concat([y_test_df, X_test_df], axis=1)
     test_df["IDX"] = range(0, len(test_df))
     
@@ -109,6 +113,7 @@ if opt_backtest:
             X_test,
             y_test,
             test_df,
+            train_df,
             scaler,
             ticker,
             window,

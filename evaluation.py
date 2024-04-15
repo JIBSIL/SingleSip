@@ -120,6 +120,8 @@ def evaluate_full(modeL_name):
     print(f'Stoploss activated {stoploss_activated_times} times')
     print('Average outperform is', np.mean(outperforms))
     print('Median outperform is', np.median(outperforms))
+    print('Average change percent is', np.mean(change_percents))
+    print('Median change percent is', np.median(change_percents))
     print('Standard deviation for change percents is', np.std(change_percents))
     print('Standard deviation for outperform is', np.std(outperforms))
     print()

@@ -139,7 +139,7 @@ def prepare_and_train(df_train, model_name):
     
     criterion = nn.MSELoss()
     print(torch.sqrt(criterion(actuals, val_predictions)))
-    
+            
     return best_tft, validation
 
 # def load_and_measure_loss(model_path):
