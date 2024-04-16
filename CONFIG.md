@@ -3,10 +3,15 @@
 Outlined here are all of the configuration settings in this project.
 
 `ticker`: string; ticker for CoinAPI - e.g LTC or BTC
+
 `window`: number; the window of time (organized into four-hour steps) that the model considers at one time while predicting
+
 `lookback`: number; amount of steps to consider for technical indicators
+
 `model`: string; relative or absolute path to a model. Lightning .ckpt models are supported, as well as zipped Tensorflow/Keras .zip models
+
 `coinapi-apikey`: string; API key for [CoinAPI](https://www.coinapi.io/)
+
 `traintest-split`: float; split between training and testing data. Should be a float specifying the amount of testing data to use, out of 1. For example, 0.1 would indicate that 90% of training data should be used, and 10% should be used for testing.
 
 `communication-options`: telegram options
