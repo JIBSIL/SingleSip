@@ -1,6 +1,6 @@
 ## SingleSip
 
-Welcome to the repository of SingleSip, a next-generation cryptocurrency trading bot operating on hundreds of unique cryptocurrencies. All of the code in this repository is open-source and built from the ground up, including a robust evaluation framework, backtesting and live trading. The project is being maintained as a hobby project. It is fully operational, from data acquisition to evaluation to trading.
+SingleSip: open-source and free next-gen trading bot for hundreds of cryptocurrencies. Integrated backtesting, data acquisition, evaluation, A/B testing and trading.
 
 ## Intro
 SingleSip is organized into backtesting, A/B testing and evaluation. Some Python, Tensorflow and finance experience is required to get the most out of the project. If you have the required knowledge and spend some time adjusting settings, the model should work well. That being said, this project is **not plug-and-play**, due to the complexity of the technologies used and the dynamic nature of financial markets.
