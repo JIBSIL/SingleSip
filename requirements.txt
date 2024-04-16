@@ -2,10 +2,11 @@ iso8601
 scheduler
 numpy
 pyyaml
-tensorflow
-python-telegram-bot
+tensorflow===2.12.0
+python-telegram-bot==21.0.1
 pandas
 scikit-learn
 requests
 matplotlib
 nest_asyncio
+websockets

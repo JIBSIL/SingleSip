@@ -94,7 +94,7 @@ print("Trader initialized!\n")
 telegram_bot, thread = telegram.run_bot(telegram_api_key, telegram_password)
 
 telegram_bot.send_message(
-    f"✅ Starting realtime trading on ticker USDT_{ticker} (dryrun off)..."
+    f"✅ Starting realtime trading on ticker USDT-{ticker} (dryrun off)..."
 )
 
 # initialize predictor
