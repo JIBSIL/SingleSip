@@ -183,7 +183,7 @@ def backtest(
             #print(
             #    f"Liquidation executed. {ticker} Balance: {round(btc_balance, 5)}, USD Balance: {round(balance, 2)}"
             #)
-        elif abs(predicted_change) > 0.04:
+        elif abs(predicted_change) > 0.01:
             balance, btc_balance, model_was_right = execute_trade(
                 predicted_price_tomorrow,
                 actual_price_today,
