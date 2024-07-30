@@ -2,7 +2,7 @@ iso8601
 scheduler
 numpy
 pyyaml
-tensorflow===2.12.0
+tensorflow===2.12.1
 python-telegram-bot==21.0.1
 pandas
 scikit-learn
